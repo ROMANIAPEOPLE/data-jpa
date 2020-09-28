@@ -8,6 +8,8 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
+import java.util.List;
+
 @SpringBootTest
 @Transactional
 @Rollback(false)
@@ -23,6 +25,20 @@ class MemberRepositoryTest2 {
         Member findMember = memberRepository.findById(member.getId()).get();
 
         Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());
+
+    }
+
+    @Test
+    public void findUsernameList(){
+    Member m1=new Member("AAA",10);
+    Member m2=new Member("BBB",20);
+    memberRepository.save(m1);
+    memberRepository.save(m2);
+
+        List<String> usernameList = memberRepository.findUsernameList();
+        for (String s : usernameList) {
+            System.out.println("s=" + s);
+        }
 
     }
 
