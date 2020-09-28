@@ -3,6 +3,7 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -36,5 +37,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Page<Member> findByAge(int age, Pageable pageable);
 
+
+    //벌크성 수정쿼리(조건에 맞는거 전체 수정)
+    @Modifying(clearAutomatically = true)
+    @Query("update Member m set m.age = m.age+1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
 
 }
