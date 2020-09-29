@@ -50,7 +50,6 @@ class MemberRepositoryTest2 {
       //페이징 테스트
     @Test
     public void paging() throws Exception {
-        //given
         memberRepository.save(new Member("member1", 10));
         memberRepository.save(new Member("member2", 10));
         memberRepository.save(new Member("member3", 10));
@@ -63,7 +62,8 @@ class MemberRepositoryTest2 {
 
         //when
          Page<Member>  page=memberRepository.findByAge(age,pageRequest);
-        //페이지 계산 공식 적용...
+
+         //페이지 계산 공식 적용...
         // totalPage = totalCount / size ...
         // 마지막 페이지 ...
         // 최초 페이지 ..x
@@ -71,6 +71,7 @@ class MemberRepositoryTest2 {
         //API로 반환할때는, Entity를 노출시키면 안되기때문에 Dto로 변환해서 사용해야한다.
         //이 경우 Page의 map을 이용하자.
         Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(),member.getUsername(),null));
+
 
 
 
