@@ -62,6 +62,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByUsername(@Param("username") String username);
 
 
+    //별로 쓸 일 없음
     @QueryHints(value =@QueryHint(name ="org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByUsername(String username);
 
