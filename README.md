@@ -139,3 +139,98 @@ Sort getSort();              //정렬정보
   </div>
 </details>
 
+<details>
+  <summary>2. 벌크성 수정쿼리 + @EntityGraph</summary>
+  <div markdown="1">
+  
+  # 벌크성 수정 쿼리
+
+- 무언가를 수정하는 쿼리를 날릴때는 @Modifying을 적어줘야 한다.
+
+- 벌크성 수정쿼리의 예시로, 회원의 나이를 1씩 증가시키는 쿼리를 살펴보자
+
+  - ```java
+    @Query("update Member m set m.age = m.age +1 where m.age >=:age")
+    int bulkAgePlus(@Param"age" int age);
+    ```
+
+- 벌크 연산 이후에는 꼭 영속성 컨텍스트를 clear 해줘야 한다.
+
+  - DB에는 벌크성 수정쿼리를 실행한 값이 반영되어있는데 영속성 컨텍스트에는 반영되기 전 값으로 남아있다.
+
+  - 벌크 연산 이후에 다른 로직이 실행되거나 이어지는게 없으면 상관 없지만, 다른 작업이 추가로 이어진다면 반드시 영속성 컨텐스트를 clear 해야 정상적으로 반영된다.
+
+  - **이러한 문제를 해결하기 위해 스프링 데이터JPA는 기능을 지원한다**
+
+    - @Modifying(clearAutotmatically = true) 로 설정하면 자동으로 영속성 컨텍스트를 clear해준다.
+
+    
+
+
+
+## @EntityGraph란?
+
+```java
+@Test
+public void findMemberLazy() {
+    Team teamA = new Team("teamA");
+    Team teamB = new Team("teamB");
+    Member member1 = new Member("member1,10,teamA");
+    Member member2 = new Member("member2,12,teamB");
+    memberRepository.save(member1);
+    memberRepository.save(member2);
+    
+    em.flush();
+    em.clear();
+    
+    List<Member> members = memberRepository.findAll();
+    
+    
+}
+```
+
+- EntityGraph를 이해하기 위해서는 Fetch Join과 지연 로딩 이라는 개념을 알아야한다.
+
+- 간단하게 설명해서, 실무에서 연관관계 매핑시 모두 LAZY 로딩으로 설정해야하는데
+
+  - 지연로딩(LAZY)으로 설정시, 연관된 엔티티를 조회하는 동시에 한번에 쿼리문을 날리지 않고, 그 엔티티가 사용되는 시점에 추가로 쿼리를 날리는 방법이다.
+
+  - N+1 문제가 발생하는데, 만약 조회된 Member가 위 예제처럼 2개라고 생각해보자.
+
+    - 그러면 Member를 조회하는 쿼리를 날린 후,  Team을 조회하는 쿼리가 2개 더 날라간다. 
+
+    - 이러한 문제를 해결하기 위해 Fetch Join 이라는 것을 사용해야 한다.
+
+    - ```java
+      @Query("select m from Member m left join fetch m.team")
+      List<Member> findMemberFechJoin();
+      ```
+
+- @EntityGraph 사용하기
+
+  - ```java
+    @OVerride
+    @EntityGraph(attributePaths ={"team"})
+    List<Member> findAll();
+    //Fetch join 대신 EntityGraph 어노테이션을 추가하고, fetch join 할 엔티티 명을 넣어주면 된다.
+    ```
+
+  - ```java
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m")
+    List<Member> findMemberEntityGraph();
+    //JPQL을 사용하면서 , Fetch join만 생략 후 EntityGraph 어노테이션 사용 가능
+    ```
+
+  - ```java
+    @EntityGraph(attributePaths= {"team"})
+    List<Member> findEntityByUsername(@Param("username") String username);
+    //메서드 이름으로 쿼리를 사용할때도 EntityGraph를 사용할 수 있다.
+    ```
+
+    
+  </div>
+</details>
+
+
+
